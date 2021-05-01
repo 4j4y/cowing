@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 type CovidData struct {
@@ -36,8 +37,45 @@ type CovidData struct {
 }
 
 func main() {
+	usingPin := false
+	usingDistrictID := true
+	pin := "332001"
+	did := "513"
+	loc, _ := time.LoadLocation("Asia/Calcutta")
+	for usingPin {
+		todayString := GetDate(loc)
+		callCowinUsingPin(pin, todayString)
+		time.Sleep(15 * time.Minute)
+	}
+	for usingDistrictID {
+		todayString := GetDate(loc)
+		fmt.Printf("Script last pinged at %s\n", todayString)
+		callCowinUsingDid(did, todayString)
+		time.Sleep(5 * time.Minute)
+	}
 
-	url := "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin?pincode=332001&date=01-05-2021"
+}
+
+func GetDate(loc *time.Location) string {
+	istNow := time.Now().In(loc)
+	fmt.Printf("Script last pinged at %v\n", istNow)
+	year, month, day := istNow.Date()
+	todayString := fmt.Sprintf("%02d-%02d-%d", day, month, year)
+	fmt.Printf("Script last pinged at %s\n", todayString)
+	return todayString
+}
+
+func callCowinUsingPin(pin string, date string) {
+	url := "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin?pincode=" + pin + "&date=" + date
+	callCowin(url)
+}
+
+func callCowinUsingDid(did string, date string) {
+	url := "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict?district_id=" + did + "&date=" + date
+	callCowin(url)
+}
+
+func callCowin(url string) {
 	method := "GET"
 
 	client := &http.Client{
@@ -48,12 +86,8 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	req.Header.Add("authority", "cdn-api.co-vin.in")
+
 	req.Header.Add("accept", "application/json, text/plain, */*")
-	req.Header.Add("sec-ch-ua-mobile", "?0")
-	req.Header.Add("origin", "https://www.cowin.gov.in")
-	req.Header.Add("referer", "https://www.cowin.gov.in/")
-	req.Header.Add("accept-language", "en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7")
 
 	res, err := client.Do(req)
 	if err != nil {
@@ -81,10 +115,13 @@ func main() {
 			minAgeLimit := covidData.Centers[i].Sessions[j].MinAgeLimit
 			if minAgeLimit == 18 {
 				fmt.Println("+++++++++++++++Center Information+++++++++++++++++")
-				fmt.Printf("Center Name:\t %s \n", covidData.Centers[i].Name)
-				fmt.Printf("Center Name:\t %s \n", covidData.Centers[i].Name)
-				fmt.Printf("Date:\t %s \n", covidData.Centers[i].Sessions[j].Date)
+				fmt.Printf("Center Name:\t\t %s \n", covidData.Centers[i].Name)
+				fmt.Printf("Center Pincode:\t\t %d \n", covidData.Centers[i].Pincode)
+				fmt.Printf("Center Lat:\t\t %d \n", covidData.Centers[i].Lat)
+				fmt.Printf("Center Long:\t\t %d \n", covidData.Centers[i].Long)
+				fmt.Printf("Date:\t\t\t %s \n", covidData.Centers[i].Sessions[j].Date)
 				fmt.Printf("Available Capacity:\t %d \n", covidData.Centers[i].Sessions[j].AvailableCapacity)
+				fmt.Printf("Vaccine type:\t %s \n", covidData.Centers[i].Sessions[j].Vaccine)
 			}
 
 		}
