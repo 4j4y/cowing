@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gen2brain/beeep"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -42,16 +43,18 @@ func main() {
 	pin := "332001"
 	did := "513"
 	loc, _ := time.LoadLocation("Asia/Calcutta")
+	fmt.Print("\033[H\033[2J")
 	for usingPin {
 		todayString := GetDate(loc)
 		callCowinUsingPin(pin, todayString)
 		time.Sleep(15 * time.Minute)
+		fmt.Print("\033[H\033[2J")
 	}
 	for usingDistrictID {
 		todayString := GetDate(loc)
-		fmt.Printf("Script last pinged at %s\n", todayString)
 		callCowinUsingDid(did, todayString)
-		time.Sleep(5 * time.Minute)
+		time.Sleep(2 * time.Minute)
+		fmt.Print("\033[H\033[2J")
 	}
 
 }
@@ -61,7 +64,6 @@ func GetDate(loc *time.Location) string {
 	fmt.Printf("Script last pinged at %v\n", istNow)
 	year, month, day := istNow.Date()
 	todayString := fmt.Sprintf("%02d-%02d-%d", day, month, year)
-	fmt.Printf("Script last pinged at %s\n", todayString)
 	return todayString
 }
 
@@ -114,14 +116,23 @@ func callCowin(url string) {
 		for j := 0; j < totalSessions; j++ {
 			minAgeLimit := covidData.Centers[i].Sessions[j].MinAgeLimit
 			if minAgeLimit == 18 {
-				fmt.Println("+++++++++++++++Center Information+++++++++++++++++")
-				fmt.Printf("Center Name:\t\t %s \n", covidData.Centers[i].Name)
-				fmt.Printf("Center Pincode:\t\t %d \n", covidData.Centers[i].Pincode)
-				fmt.Printf("Center Lat:\t\t %d \n", covidData.Centers[i].Lat)
-				fmt.Printf("Center Long:\t\t %d \n", covidData.Centers[i].Long)
-				fmt.Printf("Date:\t\t\t %s \n", covidData.Centers[i].Sessions[j].Date)
-				fmt.Printf("Available Capacity:\t %d \n", covidData.Centers[i].Sessions[j].AvailableCapacity)
-				fmt.Printf("Vaccine type:\t %s \n", covidData.Centers[i].Sessions[j].Vaccine)
+				if covidData.Centers[i].CenterID != 582783 && // blacklist a center
+					covidData.Centers[i].Sessions[j].AvailableCapacity > 0 { // remove unusable centers
+					fmt.Println("+++++++++++++++Center Information+++++++++++++++++")
+					fmt.Printf("Center ID:\t\t %d \n", covidData.Centers[i].CenterID)
+					fmt.Printf("Center Name:\t\t %s \n", covidData.Centers[i].Name)
+					fmt.Printf("Center Pincode:\t\t %d \n", covidData.Centers[i].Pincode)
+					fmt.Printf("Center Lat:\t\t %d \n", covidData.Centers[i].Lat)
+					fmt.Printf("Center Long:\t\t %d \n", covidData.Centers[i].Long)
+					fmt.Printf("Date:\t\t\t %s \n", covidData.Centers[i].Sessions[j].Date)
+					fmt.Printf("Available Capacity:\t %d \n", covidData.Centers[i].Sessions[j].AvailableCapacity)
+					fmt.Printf("Vaccine type:\t %s \n", covidData.Centers[i].Sessions[j].Vaccine)
+					msgBody := fmt.Sprintf("Center Name: %s \nAvailable Capacity: %d", covidData.Centers[i].Name, covidData.Centers[i].Sessions[j].AvailableCapacity)
+					err := beeep.Alert("Found a center", msgBody, "assets/information.png")
+					if err != nil {
+						panic(err)
+					}
+				}
 			}
 
 		}
