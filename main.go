@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gen2brain/beeep"
+	"github.com/tardisgo/tardisgo/goroot/haxe/go1.4/src/strconv"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -38,22 +40,48 @@ type CovidData struct {
 }
 
 func main() {
+	queryType := os.Args[1]
+	identifierID := os.Args[2]
+	frequency := os.Args[3]
 	usingPin := false
-	usingDistrictID := true
-	pin := "332001"
-	did := "513"
+	usingDistrictID := false
+	pin := ""
+	did := ""
+	var frequencyInMinutes time.Duration
+	frequencyInMinutes = 1
+	if queryType == "pin" {
+		usingPin = true
+	} else if queryType == "did" {
+		usingDistrictID = true
+	} else {
+		panic("provide either `pin` or `did`")
+	}
+	if len(identifierID) == 0 {
+		panic("provide appropriate `pin` or `did`")
+	} else if queryType == "pin" {
+		pin = identifierID
+	} else {
+		did = identifierID
+	}
+	if len(frequency) > 0 {
+		parseInt, err := strconv.ParseInt(frequency, 10, 64)
+		if err != nil {
+			panic("wrong format of frequency")
+		}
+		frequencyInMinutes = time.Duration(parseInt)
+	}
 	loc, _ := time.LoadLocation("Asia/Calcutta")
 	fmt.Print("\033[H\033[2J")
 	for usingPin {
 		todayString := GetDate(loc)
 		callCowinUsingPin(pin, todayString)
-		time.Sleep(15 * time.Minute)
+		time.Sleep(frequencyInMinutes * time.Minute)
 		fmt.Print("\033[H\033[2J")
 	}
 	for usingDistrictID {
 		todayString := GetDate(loc)
 		callCowinUsingDid(did, todayString)
-		time.Sleep(2 * time.Minute)
+		time.Sleep(frequencyInMinutes * time.Minute)
 		fmt.Print("\033[H\033[2J")
 	}
 
