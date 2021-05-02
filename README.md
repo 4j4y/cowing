@@ -28,6 +28,4 @@ frequency: it defines frequency of querying in minutes
 - go to cowin app, open console>network, select district, click search, see it in the query
 
 ## Configuration 
-- To blacklist a center search following comment:
-`// blacklist a center` and add your center like follownig with `&&` operator with existing clause
-`covidData.Centers[i].CenterID != 582783`
+- To blacklist a center with `centre_id`, add it to the list names `BLACKLIST` in `main.go`
