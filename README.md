@@ -6,7 +6,7 @@
 - Using PIN: `go run main.go pin 485001 1`
 
 - To find open slots for 18+ citizens for next 5 days,  run following command
-- Using PIN: `go run main.go pin 485001 5`
+- Using PIN: `go run main.go pin 485001 1 5`
 
 pin: always `pin` for finding slot using pin
 pin value: value of pin for exampl: 485001
