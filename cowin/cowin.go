@@ -42,13 +42,19 @@ type Session struct {
 	Slots             []string `json:"slots"`
 }
 
+
 type SessionResponse struct {
 	Center  Center
 	Session Session
 }
 
-func InitRecursiveFetch(queryType, identifierID, frequency, daysToSearch string, blacklist []int,
-	ch chan SessionResponse) {
+type Response struct {
+	SessionResponse SessionResponse
+	SongToPlay string
+}
+
+func InitRecursiveFetch(queryType, identifierID, frequency, daysToSearch, songToPlay string, blacklist []int,
+	ch chan Response) {
 	BLACKLIST = blacklist
 	var daySpan int
 	var frequencyInMinutes time.Duration
@@ -99,7 +105,10 @@ func InitRecursiveFetch(queryType, identifierID, frequency, daysToSearch string,
 			fmt.Print("calling using Pin")
 			sessionData := callCowinUsingPin(pin, GetDate(loc, i))
 			if sessionData != nil {
-				ch <- *sessionData
+				ch <- Response{
+				  SessionResponse: *sessionData,
+				  SongToPlay: songToPlay,
+				}
 			}
 		}
 
@@ -110,7 +119,10 @@ func InitRecursiveFetch(queryType, identifierID, frequency, daysToSearch string,
 		for i := 0; i <= daySpan; i++ {
 			sessionData := callCowinUsingDid(did, GetDate(loc, i))
 			if sessionData != nil {
-				ch <- *sessionData
+				ch <- Response{
+					SessionResponse: *sessionData,
+					SongToPlay: songToPlay,
+				}
 			}
 		}
 		time.Sleep(frequencyInMinutes * time.Minute)
@@ -170,6 +182,7 @@ func callCowin(url string) *SessionResponse {
 		fmt.Println(err)
 		fmt.Println("-----------")
 	}
+
 	totalCenters := len(covidData.Centers)
 	for i := 0; i < totalCenters; i++ {
 		totalSessions := len(covidData.Centers[i].Sessions)
