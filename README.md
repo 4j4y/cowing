@@ -4,6 +4,7 @@
 `go get -u github.com/gen2brain/beeep`
 `go get -u github.com/faiface/beep`
 `go get .`
+
 - To find open slots for 18+ citizens for today,  run following command
 - Using PIN: `go run main.go pin 485001 1`
 
@@ -12,7 +13,6 @@
 
 - To find open slots for 18+ citizens for next 5 days and alert by playing manual song(plays for 2 sec),  run following command
 - Using PIN: `go run main.go pin 485001 1 5 example.mp3`
-
 
 pin: always `pin` for finding slot using pin
 pin value: value of pin for exampl: 485001
