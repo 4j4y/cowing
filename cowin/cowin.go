@@ -161,7 +161,19 @@ func callCowin(url string) *SessionResponse {
 		return nil
 	}
 
+	req.Header.Add("authority", "cdn-api.co-vin.in")
+	req.Header.Add("sec-ch-ua", "\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"90\", \"Google Chrome\";v=\"90\"")
 	req.Header.Add("accept", "application/json, text/plain, */*")
+	req.Header.Add("dnt", "1")
+	req.Header.Add("sec-ch-ua-mobile", "?0")
+	req.Header.Add("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36")
+	req.Header.Add("origin", "https://www.cowin.gov.in")
+	req.Header.Add("sec-fetch-site", "cross-site")
+	req.Header.Add("sec-fetch-mode", "cors")
+	req.Header.Add("sec-fetch-dest", "empty")
+	req.Header.Add("referer", "https://www.cowin.gov.in/")
+	req.Header.Add("accept-language", "en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7")
+
 
 	res, err := client.Do(req)
 	if err != nil {
